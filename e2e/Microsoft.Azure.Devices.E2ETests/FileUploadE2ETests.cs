@@ -62,34 +62,6 @@ namespace Microsoft.Azure.Devices.E2ETests
 
         [TestMethod]
         [TestCategory("FileUpload-E2E")]
-        public async Task FileUpload_SmallFile_Amqp()
-        {
-            await uploadFile(Client.TransportType.Amqp_Tcp_Only, smallFile);
-        }
-
-        [TestMethod]
-        [TestCategory("FileUpload-E2E")]
-        public async Task FileUpload_SmallFile_AmqpWs()
-        {
-            await uploadFile(Client.TransportType.Amqp_WebSocket_Only, smallFile);
-        }
-
-        [TestMethod]
-        [TestCategory("FileUpload-E2E")]
-        public async Task FileUpload_SmallFile_Mqtt()
-        {
-            await uploadFile(Client.TransportType.Mqtt_Tcp_Only, smallFile);
-        }
-
-        [TestMethod]
-        [TestCategory("FileUpload-E2E")]
-        public async Task FileUpload_SmallFile_MqttWs()
-        {
-            await uploadFile(Client.TransportType.Mqtt_WebSocket_Only, smallFile);
-        }
-
-        [TestMethod]
-        [TestCategory("FileUpload-E2E")]
         public async Task FileUpload_SmallFile_Http()
         {
             await uploadFile(Client.TransportType.Http1, smallFile);
@@ -97,65 +69,9 @@ namespace Microsoft.Azure.Devices.E2ETests
 
         [TestMethod]
         [TestCategory("FileUpload-E2E")]
-        public async Task FileUpload_BigFile_Amqp()
-        {
-            await uploadFile(Client.TransportType.Amqp_Tcp_Only, bigFile);
-        }
-
-        [TestMethod]
-        [TestCategory("FileUpload-E2E")]
-        public async Task FileUpload_BigFile_AmqpWs()
-        {
-            await uploadFile(Client.TransportType.Amqp_WebSocket_Only, bigFile);
-        }
-
-        [TestMethod]
-        [TestCategory("FileUpload-E2E")]
-        public async Task FileUpload_BigFile_Mqtt()
-        {
-            await uploadFile(Client.TransportType.Mqtt_Tcp_Only, bigFile);
-        }
-
-        [TestMethod]
-        [TestCategory("FileUpload-E2E")]
-        public async Task FileUpload_BigFile_MqttWs()
-        {
-            await uploadFile(Client.TransportType.Mqtt_WebSocket_Only, bigFile);
-        }
-
-        [TestMethod]
-        [TestCategory("FileUpload-E2E")]
         public async Task FileUpload_BigFile_Http()
         {
             await uploadFile(Client.TransportType.Http1, bigFile);
-        }
-
-        [TestMethod]
-        [TestCategory("FileUpload-E2E")]
-        public async Task FileUpload_X509_SmallFile_Amqp()
-        {
-            await uploadFile(Client.TransportType.Amqp_Tcp_Only, smallFile, true);
-        }
-
-        [TestMethod]
-        [TestCategory("FileUpload-E2E")]
-        public async Task FileUpload_X509_SmallFile_AmqpWs()
-        {
-            await uploadFile(Client.TransportType.Amqp_WebSocket_Only, smallFile, true);
-        }
-
-        [TestMethod]
-        [TestCategory("FileUpload-E2E")]
-        public async Task FileUpload_X509_SmallFile_Mqtt()
-        {
-            await uploadFile(Client.TransportType.Mqtt_Tcp_Only, smallFile, true);
-        }
-
-        [TestMethod]
-        [TestCategory("FileUpload-E2E")]
-        public async Task FileUpload_X509_SmallFile_MqttWs()
-        {
-            await uploadFile(Client.TransportType.Mqtt_WebSocket_Only, smallFile, true);
         }
 
         [TestMethod]
@@ -171,75 +87,8 @@ namespace Microsoft.Azure.Devices.E2ETests
         public async Task FileUploadSuccess_TcpLoss_Amqp()
         {
             await uploadFileDisconnectTransport(Client.TransportType.Amqp_Tcp_Only,
-                smallFile,
+                bigFile,
                 TestUtil.FaultType_Tcp,
-                TestUtil.FaultCloseReason_Boom,
-                TestUtil.DefaultDelayInSec
-                );
-        }
-
-        [TestMethod]
-        [TestCategory("FileUpload-E2E")]
-        [TestCategory("Recovery")]
-        public async Task FileUploadSuccess_TcpLoss_AmqpWs()
-        {
-            await uploadFileDisconnectTransport(Client.TransportType.Amqp_WebSocket_Only,
-                smallFile,
-                TestUtil.FaultType_Tcp,
-                TestUtil.FaultCloseReason_Boom,
-                TestUtil.DefaultDelayInSec
-                );
-        }
-
-        [Ignore]
-        [TestMethod]
-        [TestCategory("FileUpload-E2E")]
-        [TestCategory("Recovery")]
-        public async Task FileUploadSuccess_TcpLoss_Mqtt()
-        {
-            await uploadFileDisconnectTransport(Client.TransportType.Mqtt_Tcp_Only,
-                smallFile,
-                TestUtil.FaultType_Tcp,
-                TestUtil.FaultCloseReason_Boom,
-                TestUtil.DefaultDelayInSec
-                );
-        }
-
-        [Ignore]
-        [TestMethod]
-        [TestCategory("FileUpload-E2E")]
-        [TestCategory("Recovery")]
-        public async Task FileUploadSuccess_TcpLoss_MqttWs()
-        {
-            await uploadFileDisconnectTransport(Client.TransportType.Mqtt_WebSocket_Only,
-                smallFile,
-                TestUtil.FaultType_Tcp,
-                TestUtil.FaultCloseReason_Boom,
-                TestUtil.DefaultDelayInSec
-                );
-        }
-
-        [TestMethod]
-        [TestCategory("FileUpload-E2E")]
-        [TestCategory("Recovery")]
-        public async Task FileUploadSuccess_AmqpConnLoss_Amqp()
-        {
-            await uploadFileDisconnectTransport(Client.TransportType.Amqp_Tcp_Only,
-                smallFile,
-                TestUtil.FaultType_AmqpConn,
-                TestUtil.FaultCloseReason_Boom,
-                TestUtil.DefaultDelayInSec
-                );
-        }
-
-        [TestMethod]
-        [TestCategory("FileUpload-E2E")]
-        [TestCategory("Recovery")]
-        public async Task FileUploadSuccess_AmqpConnLoss_AmqpWs()
-        {
-            await uploadFileDisconnectTransport(Client.TransportType.Amqp_WebSocket_Only,
-                smallFile,
-                TestUtil.FaultType_AmqpConn,
                 TestUtil.FaultCloseReason_Boom,
                 TestUtil.DefaultDelayInSec
                 );
@@ -262,120 +111,9 @@ namespace Microsoft.Azure.Devices.E2ETests
         [TestMethod]
         [TestCategory("FileUpload-E2E")]
         [TestCategory("Recovery")]
-        public async Task FileUploadSuccess_Throttled_AmqpWs()
-        {
-            await uploadFileDisconnectTransport(Client.TransportType.Amqp_WebSocket_Only,
-                smallFile,
-                TestUtil.FaultType_Throttle,
-                TestUtil.FaultCloseReason_Boom,
-                TestUtil.DefaultDelayInSec,
-                TestUtil.DefaultDurationInSec
-                );
-        }
-        [TestMethod]
-        [TestCategory("FileUpload-E2E")]
-        [TestCategory("Recovery")]
-        public async Task FileUploadSuccess_Throttled_Mqtt()
-        {
-            await uploadFileDisconnectTransport(Client.TransportType.Mqtt_Tcp_Only,
-                smallFile,
-                TestUtil.FaultType_Throttle,
-                TestUtil.FaultCloseReason_Boom,
-                TestUtil.DefaultDelayInSec,
-                TestUtil.DefaultDurationInSec
-                );
-        }
-        [TestMethod]
-        [TestCategory("FileUpload-E2E")]
-        [TestCategory("Recovery")]
-        public async Task FileUploadSuccess_Throttled_MqttWs()
-        {
-            await uploadFileDisconnectTransport(Client.TransportType.Mqtt_WebSocket_Only,
-                smallFile,
-                TestUtil.FaultType_Throttle,
-                TestUtil.FaultCloseReason_Boom,
-                TestUtil.DefaultDelayInSec,
-                TestUtil.DefaultDurationInSec
-                );
-        }
-
-        [TestMethod]
-        [TestCategory("FileUpload-E2E")]
-        [TestCategory("Recovery")]
-        public async Task FileUploadSuccess_Throttled_Http()
-        {
-            await uploadFileDisconnectTransport(Client.TransportType.Http1,
-                smallFile,
-                TestUtil.FaultType_Throttle,
-                TestUtil.FaultCloseReason_Boom,
-                TestUtil.DefaultDelayInSec,
-                TestUtil.DefaultDurationInSec,
-                TestUtil.ShortRetryInMilliSec
-                );
-        }
-
-        [TestMethod]
-        [TestCategory("FileUpload-E2E")]
-        [TestCategory("Recovery")]
         public async Task FileUploadSuccess_QuotaExceed_Amqp()
         {
             await uploadFileDisconnectTransport(Client.TransportType.Amqp_Tcp_Only,
-                smallFile,
-                TestUtil.FaultType_QuotaExceeded,
-                TestUtil.FaultCloseReason_Boom,
-                TestUtil.DefaultDelayInSec,
-                TestUtil.DefaultDurationInSec
-                );
-        }
-
-        [TestMethod]
-        [TestCategory("FileUpload-E2E")]
-        [TestCategory("Recovery")]
-        public async Task FileUploadSuccess_QuotaExceed_AmqpWs()
-        {
-            await uploadFileDisconnectTransport(Client.TransportType.Amqp_WebSocket_Only,
-                smallFile,
-                TestUtil.FaultType_QuotaExceeded,
-                TestUtil.FaultCloseReason_Boom,
-                TestUtil.DefaultDelayInSec,
-                TestUtil.DefaultDurationInSec
-                );
-        }
-
-        [TestMethod]
-        [TestCategory("FileUpload-E2E")]
-        [TestCategory("Recovery")]
-        public async Task FileUploadSuccess_QuotaExceed_Mqtt()
-        {
-            await uploadFileDisconnectTransport(Client.TransportType.Mqtt_Tcp_Only,
-                smallFile,
-                TestUtil.FaultType_QuotaExceeded,
-                TestUtil.FaultCloseReason_Boom,
-                TestUtil.DefaultDelayInSec,
-                TestUtil.DefaultDurationInSec
-                );
-        }
-
-        [TestMethod]
-        [TestCategory("FileUpload-E2E")]
-        [TestCategory("Recovery")]
-        public async Task FileUploadSuccess_QuotaExceed_MqttWs()
-        {
-            await uploadFileDisconnectTransport(Client.TransportType.Mqtt_WebSocket_Only,
-                smallFile,
-                TestUtil.FaultType_QuotaExceeded,
-                TestUtil.FaultCloseReason_Boom,
-                TestUtil.DefaultDelayInSec,
-                TestUtil.DefaultDurationInSec
-                );
-        }
-
-        [TestMethod]
-        [TestCategory("FileUpload-E2E")]
-        [TestCategory("Recovery")]
-        public async Task FileUploadSuccess_QuotaExceed_Http()
-        {
-            await uploadFileDisconnectTransport(Client.TransportType.Http1,
                 smallFile,
                 TestUtil.FaultType_QuotaExceeded,
                 TestUtil.FaultCloseReason_Boom,
@@ -456,29 +194,28 @@ namespace Microsoft.Azure.Devices.E2ETests
             deviceClient.OperationTimeoutInMilliseconds = (uint)retryDurationInMilliSec;
 
             Task fileuploadTask;
+            Task<FileNotification> verifyTask;
             using (FileStream fileStreamSource = new FileStream(filename, FileMode.Open, FileAccess.Read))
             {
+                verifyTask = VerifyFileNotification(deviceInfo);
                 fileuploadTask = deviceClient.UploadToBlobAsync(filename, fileStreamSource);
 
-                // send error command after 400ms to allow time for the actual fileupload operation to start
-                //await Task.Delay(400);
+                try
+                {
+                    await
+                        deviceClient.SendEventAsync(TestUtil.ComposeErrorInjectionProperties(faultType, reason,
+                            delayInSec, durationInSec));
+                }
+                catch (Exception)
+                {
+                    // catch and ignore exceptions resulted from error injection and continue to 
+                    // check result of the file upload status
+                }
 
-                //try
-                //{
-                //    await
-                //        deviceClient.SendEventAsync(TestUtil.ComposeErrorInjectionProperties(faultType, reason,
-                //            delayInSec, durationInSec));
-                //}
-                //catch (Exception)
-                //{
-                //    // catch and ignore exceptions resulted from error injection and continue to 
-                //    // check result of the file upload status
-                //}
-
-                await fileuploadTask;
+                await Task.WhenAll(fileuploadTask, verifyTask);
             }
 
-            FileNotification fileNotification = await VerifyFileNotification(deviceInfo);
+            FileNotification fileNotification = await verifyTask;
 
             Assert.IsNotNull(fileNotification, "FileNotification is not received.");
             Assert.AreEqual(deviceInfo.Item1 + "/" + filename, fileNotification.BlobName, "Uploaded file name mismatch in notifications");
