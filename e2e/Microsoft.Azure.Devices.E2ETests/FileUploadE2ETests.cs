@@ -461,18 +461,19 @@ namespace Microsoft.Azure.Devices.E2ETests
                 fileuploadTask = deviceClient.UploadToBlobAsync(filename, fileStreamSource);
 
                 // send error command after 400ms to allow time for the actual fileupload operation to start
-                await Task.Delay(400);
-                try
-                {
-                    await
-                        deviceClient.SendEventAsync(TestUtil.ComposeErrorInjectionProperties(faultType, reason,
-                            delayInSec, durationInSec));
-                }
-                catch (Exception)
-                {
-                    // catch and ignore exceptions resulted from error injection and continue to 
-                    // check result of the file upload status
-                }
+                //await Task.Delay(400);
+
+                //try
+                //{
+                //    await
+                //        deviceClient.SendEventAsync(TestUtil.ComposeErrorInjectionProperties(faultType, reason,
+                //            delayInSec, durationInSec));
+                //}
+                //catch (Exception)
+                //{
+                //    // catch and ignore exceptions resulted from error injection and continue to 
+                //    // check result of the file upload status
+                //}
 
                 await fileuploadTask;
             }
