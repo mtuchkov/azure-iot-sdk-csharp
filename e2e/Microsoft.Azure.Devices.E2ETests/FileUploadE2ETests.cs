@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
@@ -15,6 +16,8 @@ namespace Microsoft.Azure.Devices.E2ETests
         private static string hubConnectionString;
         private static string hostName;
         private static RegistryManager registryManager;
+        private static ServiceClient serviceClient;
+        private static FileNotificationReceiver<FileNotification> fileNotificationReceiver;
 
         private SemaphoreSlim sequentialTestSemaphore = new SemaphoreSlim(1, 1);
 
@@ -29,6 +32,9 @@ namespace Microsoft.Azure.Devices.E2ETests
             registryManager = environment.Item2;
             hostName = TestUtil.GetHostName(hubConnectionString);
 
+            serviceClient = ServiceClient.CreateFromConnectionString(hubConnectionString);
+            fileNotificationReceiver = serviceClient.GetFileNotificationReceiver();
+
             File.WriteAllBytes(smallFile, new byte[10 * 1024]);
             File.WriteAllBytes(bigFile, new byte[5120 * 1024]);
         }
@@ -36,6 +42,7 @@ namespace Microsoft.Azure.Devices.E2ETests
         [ClassCleanup]
         static public void ClassCleanup()
         {
+            serviceClient.CloseAsync().Wait();
             System.IO.File.Delete(smallFile);
             System.IO.File.Delete(bigFile);
             TestUtil.UnInitializeEnvironment(registryManager);
@@ -403,26 +410,36 @@ namespace Microsoft.Azure.Devices.E2ETests
                 await deviceClient.UploadToBlobAsync(filename, fileStreamSource);
             }
 
-            ServiceClient serviceClient = ServiceClient.CreateFromConnectionString(hubConnectionString);
-            FileNotificationReceiver<FileNotification> fileNotificationReceiver = serviceClient.GetFileNotificationReceiver();
-
-            FileNotification fileNotification;
-            while (true)
+            bool isReceived = false;
+            FileNotification fileNotification = null;
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            while (sw.Elapsed.Seconds < 30)
             {
                 // Receive the file notification from queue
                 fileNotification = await fileNotificationReceiver.ReceiveAsync(TimeSpan.FromSeconds(20));
-                Assert.IsNotNull(fileNotification);
-                await fileNotificationReceiver.CompleteAsync(fileNotification);
-                if (deviceInfo.Item1 == fileNotification.DeviceId)
-                    break;
+                if (fileNotification != null)
+                {
+                    if (fileNotification.DeviceId == deviceInfo.Item1)
+                    {
+                        await fileNotificationReceiver.CompleteAsync(fileNotification);
+                        isReceived = true;
+                        break;
+                    }
+                    else
+                    {
+                        await fileNotificationReceiver.AbandonAsync(fileNotification);
+                    }
+                }
             }
+            sw.Stop();
 
+            Assert.IsTrue(isReceived, "FileNotification is not received.");
             Assert.AreEqual(deviceInfo.Item1 + "/" + filename, fileNotification.BlobName, "Uploaded file name mismatch in notifications");
             Assert.AreEqual(new FileInfo(filename).Length, fileNotification.BlobSizeInBytes, "Uploaded file size mismatch in notifications");
             Assert.IsFalse(string.IsNullOrEmpty(fileNotification.BlobUri), "File notification blob uri is null or empty");
 
             await deviceClient.CloseAsync();
-            await serviceClient.CloseAsync();
             TestUtil.RemoveDevice(deviceInfo.Item1, registryManager);
         }
 
@@ -456,26 +473,35 @@ namespace Microsoft.Azure.Devices.E2ETests
                 await fileuploadTask;
             }
 
-            ServiceClient serviceClient = ServiceClient.CreateFromConnectionString(hubConnectionString);
-            FileNotificationReceiver<FileNotification> fileNotificationReceiver = serviceClient.GetFileNotificationReceiver();
-
-            FileNotification fileNotification;
-            while (true)
+            bool isReceived = false;
+            FileNotification fileNotification = null;
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            while (sw.Elapsed.Seconds < 30)
             {
                 // Receive the file notification from queue
                 fileNotification = await fileNotificationReceiver.ReceiveAsync(TimeSpan.FromSeconds(20));
-                Assert.IsNotNull(fileNotification);
-                await fileNotificationReceiver.CompleteAsync(fileNotification);
-                if (deviceInfo.Item1 == fileNotification.DeviceId)
-                    break;
+                if (fileNotification != null)
+                {
+                    if (fileNotification.DeviceId == deviceInfo.Item1)
+                    {
+                        await fileNotificationReceiver.CompleteAsync(fileNotification);
+                        isReceived = true;
+                        break;
+                    }
+                    else
+                    {
+                        await fileNotificationReceiver.AbandonAsync(fileNotification);
+                    }
+                }
             }
+            sw.Stop();
 
             Assert.AreEqual(deviceInfo.Item1 + "/" + filename, fileNotification.BlobName, "Uploaded file name mismatch in notifications");
             Assert.AreEqual(new FileInfo(filename).Length, fileNotification.BlobSizeInBytes, "Uploaded file size mismatch in notifications");
             Assert.IsFalse(string.IsNullOrEmpty(fileNotification.BlobUri), "File notification blob uri is null or empty");
 
             await deviceClient.CloseAsync();
-            await serviceClient.CloseAsync();
             TestUtil.RemoveDevice(deviceInfo.Item1, registryManager);
         }
     }
