@@ -410,8 +410,21 @@ namespace Microsoft.Azure.Devices.E2ETests
                 await deviceClient.UploadToBlobAsync(filename, fileStreamSource);
             }
 
-            bool isReceived = false;
+            FileNotification fileNotification = await VerifyFileNotification(deviceInfo);
+
+            Assert.IsNotNull(fileNotification, "FileNotification is not received.");
+            Assert.AreEqual(deviceInfo.Item1 + "/" + filename, fileNotification.BlobName, "Uploaded file name mismatch in notifications");
+            Assert.AreEqual(new FileInfo(filename).Length, fileNotification.BlobSizeInBytes, "Uploaded file size mismatch in notifications");
+            Assert.IsFalse(string.IsNullOrEmpty(fileNotification.BlobUri), "File notification blob uri is null or empty");
+
+            await deviceClient.CloseAsync();
+            TestUtil.RemoveDevice(deviceInfo.Item1, registryManager);
+        }
+
+        private static async Task<FileNotification> VerifyFileNotification(Tuple<string, string> deviceInfo)
+        {
             FileNotification fileNotification = null;
+
             Stopwatch sw = new Stopwatch();
             sw.Start();
             while (sw.Elapsed.Minutes < 1)
@@ -423,24 +436,15 @@ namespace Microsoft.Azure.Devices.E2ETests
                     if (fileNotification.DeviceId == deviceInfo.Item1)
                     {
                         await fileNotificationReceiver.CompleteAsync(fileNotification);
-                        isReceived = true;
                         break;
                     }
-                    else
-                    {
-                        await fileNotificationReceiver.AbandonAsync(fileNotification);
-                    }
+
+                    await fileNotificationReceiver.AbandonAsync(fileNotification);
+                    fileNotification = null;
                 }
             }
             sw.Stop();
-
-            Assert.IsTrue(isReceived, "FileNotification is not received.");
-            Assert.AreEqual(deviceInfo.Item1 + "/" + filename, fileNotification.BlobName, "Uploaded file name mismatch in notifications");
-            Assert.AreEqual(new FileInfo(filename).Length, fileNotification.BlobSizeInBytes, "Uploaded file size mismatch in notifications");
-            Assert.IsFalse(string.IsNullOrEmpty(fileNotification.BlobUri), "File notification blob uri is null or empty");
-
-            await deviceClient.CloseAsync();
-            TestUtil.RemoveDevice(deviceInfo.Item1, registryManager);
+            return fileNotification;
         }
 
         async Task uploadFileDisconnectTransport(Client.TransportType transport, string filename, string faultType, string reason, int delayInSec, 
@@ -473,30 +477,9 @@ namespace Microsoft.Azure.Devices.E2ETests
                 await fileuploadTask;
             }
 
-            bool isReceived = false;
-            FileNotification fileNotification = null;
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-            while (sw.Elapsed.Seconds < 30)
-            {
-                // Receive the file notification from queue
-                fileNotification = await fileNotificationReceiver.ReceiveAsync(TimeSpan.FromSeconds(20));
-                if (fileNotification != null)
-                {
-                    if (fileNotification.DeviceId == deviceInfo.Item1)
-                    {
-                        await fileNotificationReceiver.CompleteAsync(fileNotification);
-                        isReceived = true;
-                        break;
-                    }
-                    else
-                    {
-                        await fileNotificationReceiver.AbandonAsync(fileNotification);
-                    }
-                }
-            }
-            sw.Stop();
+            FileNotification fileNotification = await VerifyFileNotification(deviceInfo);
 
+            Assert.IsNotNull(fileNotification, "FileNotification is not received.");
             Assert.AreEqual(deviceInfo.Item1 + "/" + filename, fileNotification.BlobName, "Uploaded file name mismatch in notifications");
             Assert.AreEqual(new FileInfo(filename).Length, fileNotification.BlobSizeInBytes, "Uploaded file size mismatch in notifications");
             Assert.IsFalse(string.IsNullOrEmpty(fileNotification.BlobUri), "File notification blob uri is null or empty");
